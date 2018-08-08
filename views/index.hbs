@@ -1,0 +1,107 @@
+
+<div class="container-fluid">
+        <h1>Float grid demo</h1>
+
+        <div>
+            <a class="btn btn-default" id="add-new-widget" href="#">Add Widget</a>
+            <a class="btn btn-default" id="save-grid" href="#">Save Grid</a>
+            <a class="btn btn-default" id="load-grid" href="#">Load Grid</a>
+            <a class="btn btn-default" id="clear-grid" href="#">Clear Grid</a>
+            <a class="btn btn-default" id="clear-all" href="#">Clear All</a>
+        </div>
+
+        <br/>
+        <div class="frame">
+            <div class="container-frame">
+
+                <div class="grid-stack" data-gs-height="12" data-gs-animate></div>
+                
+            </div>
+            <div style="float: left;">
+                <textarea id="saved-data" cols="80" rows="31" readonly="readonly" style="height: 620px;"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var y = 0;
+        $(function () {
+            var options = {
+                float: true,
+                cellHeight: 30
+            };
+
+            $('.grid-stack').gridstack(options);
+
+            new function () {
+
+                //this.items = [];
+                this.serializedData = [];
+
+                this.grid = $('.grid-stack').data('gridstack');
+
+                this.addNewWidget = function () {
+
+                    var node = {
+                        x: 0,
+                        y: 0,
+                        width: 1,
+                        height: 1
+                    };
+                    this.serializedData.push(node);
+                    y++;
+                    if (y < 9) {
+                        this.grid.addWidget($('<div><div class="grid-stack-item-content" /><div/>'), node.x, node.y, node.width, node.height);
+                    }
+                    return false;
+
+                }.bind(this);
+
+                $('#add-new-widget').click(this.addNewWidget);
+
+                this.loadGrid = function () {
+                    this.grid.removeAll();
+                    var items = GridStackUI.Utils.sort(this.serializedData);
+                    _.each(items, function (node) {
+                        this.grid.addWidget($('<div><div class="grid-stack-item-content" /></div>'),
+                            node.x, node.y, node.width, node.height);
+                    }.bind(this));
+                    return false;
+                }.bind(this);
+
+                this.saveGrid = function () {
+                    this.serializedData = _.map($('.grid-stack > .grid-stack-item:visible'), function (el) {
+                        el = $(el);
+                        var node = el.data('_gridstack_node');
+                        return {
+                            x: node.x,
+                            y: node.y,
+                            width: node.width,
+                            height: node.height
+                        };
+                    });
+                    $('#saved-data').val(JSON.stringify(this.serializedData, null, '    '));
+                    return false;
+                }.bind(this);
+
+                this.clearGrid = function () {
+                    this.grid.removeAll();
+                    return false;
+                }.bind(this);
+
+                this.clearAll = function () {
+                    y = 0;
+                    this.serializedData = [];
+                    this.grid.removeAll();
+                    $('#saved-data').val('');
+                    return false;
+                }.bind(this);
+
+                $('#save-grid').click(this.saveGrid);
+                $('#load-grid').click(this.loadGrid);
+                $('#clear-grid').click(this.clearGrid);
+                $('#clear-all').click(this.clearAll);
+            };
+
+        });
+    </script>
